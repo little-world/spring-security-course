@@ -1,0 +1,28 @@
+Validate Inputs
+
+Use Final Variables
+
+Immutable Objects
+
+
+Fail Early
+
+Use Enums
+
+Avoid Null References
+
+Catch Exceptions Appropriately
+
+Use Assertions
+
+API Contracts
+
+Limit Visibility
+
+
+ Thread-Safety with Atomic Classes
+
+
+Managing External Resource Dependencies
+
+ReadOnly or Unmodifiable Collections

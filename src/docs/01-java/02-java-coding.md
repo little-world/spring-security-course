@@ -176,13 +176,45 @@ public List<String> getItems() {
 
 ## Exercises
 
+### Refactor to Immutable
+Refactor Mutable Class to Immutable: Take an existing class with mutable state and refactor it into an immutable class. This exercise helps in understanding the practical challenges and solutions when working with legacy code.
 
-#### Input Validation
+``` java
+public class Person {
+private String name;
+private int age;
 
-You have a method that takes a username and password to create a user account.
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
 
-Implement input validation to ensure that the username and password comply with specified rules, e.g., minimum lengths, containing special characters, etc.
-Implement custom exception handling to throw and catch specific exceptions related to validation.
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+```
+
+
+### Builder pattern
+Implement the immutable class Person using the Builder pattern. This is useful for classes with many fields, some of which may be optional. The Builder pattern can provide more readable and maintainable code.
+
+
+### Refactor to record
+Immutable Class with Java Records (Java 14 and above): If you are using Java 14 or later, create an immutable class using Java Records, which is a feature specifically designed to simplify the creation of immutable data carriers.
+
 
 #### Null Safety
 You have a method that takes a String and performs operations, such as trimming, converting to upper case, etc.
@@ -190,46 +222,125 @@ You have a method that takes a String and performs operations, such as trimming,
 Implement null safety to ensure that if a null value is passed to the method, it does not throw a NullPointerException and instead handles it gracefully.   
 Utilize Optional to manage potential null values in a more functional way.
 
-#### Immutable Data Structures
-
-You have a Person class that has properties like name, age, etc.
-
-
-Make the Person class immutable to ensure that once an instance is created, it cannot be modified.    
-Implement a method that returns a new instance of Person with modified properties, ensuring the original instance remains unchanged.
-
-
-#### Error Handling in I/O Operations
-You have a method that reads a file and processes the data.
-Implement error handling to manage potential issues, such as the file not being found, I/O errors, or data format issues.    
-Implement a retry mechanism to attempt reading the file multiple times before finally throwing an error.
-
-#### Concurrent Modification
-You have a method that modifies a List while iterating over it.
-
-Implement logic to safely manage concurrent modifications to the List to avoid ConcurrentModificationException.     
-Explore using CopyOnWriteArrayList and understand its pros and cons.
 
 
 ## Solutions
 
-#### Input Validation
+### Refactor to Immutable Class
 
 ```java
-public class UserService {
-  public void createUser(String username, String password) {
-    if (username == null || username.length() < 5 || !username.matches("^[a-zA-Z0-9_]+$")) {
-      throw new IllegalArgumentException("Invalid username");
+
+public final class Person {
+private final String name;
+private final int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
     }
-    if (password == null || password.length() < 8) {
-      throw new IllegalArgumentException("Invalid password");
+
+    public String getName() {
+        return name;
     }
-// Create user...
-  }
+
+    public int getAge() {
+        return age;
+    }
 }
 ```
 
-#### Null Safety
+In the immutable version (ImmutablePerson):
+
+- The class is declared final to prevent subclassing.
+- All fields are final to ensure they are immutable.
+- There are no setter methods.
+- The constructor sets all properties.
+
+Once a ImmutablePerson object is created, its state cannot be altered, which is the essence of immutability.
+
+
+### Builder pattern
+
+To incorporate the Builder pattern with the Person class, we create a static nested Builder class inside Person. This pattern is useful when dealing with objects that have several fields, some of which might be optional. It improves code readability and maintainability.
+
+```java
+public final class Person {
+  private final String name;
+  private final int age;
+  private final String address; // Optional field
+
+  private Person(String name, int age, String address) {
+    this.name = name;
+    this.age = age;
+    this.address = address;
+  }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    // Static Builder class
+    public static class Builder {
+        private String name;
+        private int age;
+        private String address;
+        
+
+      public Builder name(String name) {
+        this.name = name;
+        return this;
+      }
+
+      public Builder age(int age) {
+        this.age = age;
+        return this;
+      }
+      
+      public Builder address(String address) {
+        this.address = address;
+        return this;
+      }
+
+      public Person build() {
+        return new Person(name, age, address);
+      }
+    }
+}
+```
+How to Use the Builder:
+```java
+public class Main {
+  public static void main(String[] args) {
+    Person person = new Person.Builder()
+      .name("John Doe")
+      .age(30)
+      .address("123 Main St")
+      .build();
+
+      System.out.println("Name: " + person.getName());
+      System.out.println("Age: " + person.getAge());
+      System.out.println("Address: " + person.getAddress());
+    }
+}
+```
+In this implementation:
+
+- Person has a private constructor and a nested static Builder class.
+- The Builder class has methods for setting optional fields and a build() method that creates the Person instance.
+- Fields are set using fluent Builder methods.
+
+### Input Validation
+
+
+### Null Safety
 
 ```java
 public class StringUtils {
@@ -238,77 +349,3 @@ public class StringUtils {
   }
 }
 ```
-
-#### Immutable Data Structures
-
-```java
-public final class Person {
-  private final String name;
-  private final int age;
-
-  public Person(String name, int age) {
-    this.name = name;
-    this.age = age;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public int getAge() {
-    return age;
-  }
-
-  public Person withName(String newName) {
-    return new Person(newName, this.age);
-  }
-
-  public Person withAge(int newAge) {
-    return new Person(this.name, newAge);
-  }
-}
-```
-
-#### Error Handling in I/O Operations
-
-```java
-import java.io.IOException;
-import java.nio.file.*;
-
-public class FileReader {
-  public String readFile(String path) {
-    try {
-      return new String(Files.readAllBytes(Paths.get(path)));
-    } catch (IOException e) {
-      throw new RuntimeException("Error reading file: " + path, e);
-    }
-  }
-}
-```
-
-#### Concurrent Modification
-
-```java
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-public class ListModifier {
-  public void modifyList(List<String> list) {
-    List<String> safeList = new CopyOnWriteArrayList<>(list);
-    for (Iterator<String> iterator = safeList.iterator(); iterator.hasNext(); ) {
-      String item = iterator.next();
-      // perform modifications, such as remove or add elements to safeList
-    }
-    list.clear();
-    list.addAll(safeList);
-  }
-}
-```
-Notes:
-
-- Input Validation: Ensure valid inputs are passed, or throw relevant exceptions.
-- Null Safety: Utilize Optional to prevent NullPointerException and handle null gracefully.
-- Immutable Data Structures: Immutable objects can't be altered once they're created. They are thread-safe and have no risk of being changed unexpectedly.
-- Error Handling in I/O Operations: Use try/catch to handle I/O errors and manage failure scenarios gracefully.
-- Concurrent Modification: Using CopyOnWriteArrayList can be helpful to avoid ConcurrentModificationException when modifying a list during iteration, but beware of its performance implications on write-heavy use cases.

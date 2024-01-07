@@ -88,37 +88,48 @@ In this example, a list of integers is filtered to only include even numbers, an
 
 ## Exercises
 
-- Basic Operations:
+### Basic Operations:
 
--- Given a list of numbers, use a stream to double each element and collect the results into a list.
--- From a list of strings, filter out strings that are shorter than 5 characters.
+#### Double each element
+Given a list of numbers use a stream to double each element and collect the results into a list.
+#### Filter out short strings
+From a list of strings filter out strings that are shorter than 5 characters.
 
-- Intermediate Operations:
+### Intermediate Operations:
 
--- From a list of strings, find the first string that starts with the letter 'A' and has a length greater than 3.
--- Convert a list of strings into a list of their lengths.
+#### First string with criteria
+From a list of strings, find the first string that starts with the letter 'A' and has a length greater than 3.
+#### Convert to lengths
+Convert a list of strings into a list of their lengths.
 
-- Terminal Operations:
+### Terminal Operations:
 
--- From a list of numbers, compute the sum.
--- Check if a list of numbers has any number greater than 10.
+#### Compute the sum
+From a list of numbers, compute the sum.
 
-- Advanced Operations:
+#### Any number greater than 10
+Check if a list of numbers has any number greater than 10.
 
--- Convert a list of strings into a map where the keys are the strings and the values are their lengths.
--- Given a list of numbers, partition them into two groups: even and odd.
+### Advanced Operations:
 
-- Combining Streams and Optional:
+#### Convert to map
+Convert a list of strings into a map where the keys are the strings and the values are their lengths.
+#### Partition numbers
+Given a list of numbers, partition them into two groups: even and odd.
 
--- From a list of strings, find the longest string. If there's a tie, choose any.
--- From a list of integers, find the maximum value.
+### Combining Streams and Optional:
+
+#### Find the longest string
+From a list of strings, find the longest string. If there's a tie, choose any.
+#### Find the maximum value
+From a list of integers, find the maximum value.
 
 
 ## Solutions
 
-Basic Operations:
+### Basic Operations:
 
-- Double each element.
+#### Double each element.
 ```java
 List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
 List<Integer> doubled = numbers.stream()
@@ -127,7 +138,7 @@ List<Integer> doubled = numbers.stream()
 System.out.println(doubled);  // [2, 4, 6, 8, 10]
 ```
 
-- Filter out short strings.
+#### Filter out short strings.
 ```java
 List<String> words = Arrays.asList("apple", "pie", "banana", "ant");
 List<String> longWords = words.stream()
@@ -136,9 +147,9 @@ List<String> longWords = words.stream()
 System.out.println(longWords);  // [apple, banana]
 ```
 
-Intermediate Operations:
+### Intermediate Operations:
 
-- First string with criteria.
+#### First string with criteria.
 ```java
 Optional<String> result = words.stream()
  .filter(w -> w.startsWith("A") && w.length() > 3)
@@ -146,37 +157,37 @@ Optional<String> result = words.stream()
 System.out.println(result.orElse("Not found"));
 ```
 
-- Convert to lengths.
+#### Convert to lengths.
 ```java
 List<Integer> lengths = words.stream()
  .map(String::length)
  .collect(Collectors.toList());
 System.out.println(lengths);  // [5, 3, 6, 3]
 ```
-#### Terminal Operations:
+### Terminal Operations:
 
-- Compute the sum.
+#### Compute the sum.
 ```java
 int sum = numbers.stream()
  .mapToInt(Integer::intValue)
  .sum();
 System.out.println(sum);  // 15
 ```
-- Any number greater than 10.
+#### Any number greater than 10.
 ```java
 boolean hasLargeNumber = numbers.stream()
  .anyMatch(n -> n > 10);
 System.out.println(hasLargeNumber);  // false
 ```
-#### Advanced Operations
+### Advanced Operations
 
-- Convert to map.
+#### Convert to map.
 ```java
 Map<String, Integer> wordLengths = words.stream()
  .collect(Collectors.toMap(Function.identity(), String::length));
 System.out.println(wordLengths);  // {apple=5, pie=3, banana=6, ant=3}
 ```
-- Partition numbers.
+#### Partition numbers.
 ```java
 Map<Boolean, List<Integer>> partitioned = numbers.stream()
 .collect(Collectors.partitioningBy(n -> n % 2 == 0));
@@ -184,17 +195,16 @@ System.out.println(partitioned);  // {false=[1, 3, 5], true=[2, 4]}
 ```
 #### Combining Streams and Optional:
 
-- Find the longest string.
+#### Find the longest string.
 ```java
 Optional<String> longest = words.stream()
  .max(Comparator.comparingInt(String::length));
 System.out.println(longest.orElse("Empty list"));
 ```
 
-- Find the maximum value.
+#### Find the maximum value.
 ```java
 Optional<Integer> maxValue = numbers.stream()
 .max(Integer::compareTo);
 System.out.println(maxValue.orElse(null));  // 5
 ```
-

@@ -1,5 +1,5 @@
 
-# Encryption
+# Java Cryptography
 
 To perform encryption and decryption in Java, you typically use the Java Cryptography Architecture (JCA) and Java Cryptography Extension (JCE). These provide a framework and implementations for encryption, key generation, key agreement, and message authentication code (MAC) algorithms.
 
@@ -62,24 +62,158 @@ Convert the message to bytes and use Cipher to encrypt it, then encode the resul
 - Decrypt the Message:   
 Decode the Base64 string to bytes and use Cipher to decrypt it, then convert the resulting byte array back to the original string.
 
+
+###  Asymmetric Encryption
+Here's a simplified example of how you might implement a system with RSA asymmetric encryption in Java.
+
+#### Key Pair Generation
+
+Generate a pair of RSA keys (public and private).
+```java
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+public class AsymmetricEncryptionUtil {
+
+  public static KeyPair generateRSAKeyPair() throws Exception {
+    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+    keyPairGenerator.initialize(2048); // Key size
+    return keyPairGenerator.generateKeyPair();
+  }
+
+  //... Other methods will go here
+}
+```
+#### Encryption
+
+Encrypt a message using the recipient’s public key.
+
+```java
+import javax.crypto.Cipher;
+import java.util.Base64;
+
+public class AsymmetricEncryptionUtil {
+//... Previous methods
+
+  public static String encrypt(String message, PublicKey publicKey) throws Exception {
+    Cipher cipher = Cipher.getInstance("RSA");
+    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+    byte[] encryptedBytes = cipher.doFinal(message.getBytes());
+    return Base64.getEncoder().encodeToString(encryptedBytes);
+  }
+}
+```
+#### Decryption
+
+Decrypt a message using the recipient’s private key.
+
+```java
+import javax.crypto.Cipher;
+import java.util.Base64;
+
+public class AsymmetricEncryptionUtil {
+//... Previous methods
+
+  public static String decrypt(String encryptedMessage, PrivateKey privateKey) throws Exception {
+    Cipher cipher = Cipher.getInstance("RSA");
+    cipher.init(Cipher.DECRYPT_MODE, privateKey);
+    byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
+    return new String(decryptedBytes);
+  }
+}
+```
+#### Main Application
+
+Let's assume Alice and Bob want to communicate securely. Alice encrypts the message with Bob’s public key, and Bob decrypts it with his private key.
+
+```java
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
+public class MainApp {
+  public static void main(String[] args) {
+    try {
+      // Generate RSA key pairs for Alice and Bob
+      KeyPair aliceKeyPair = AsymmetricEncryptionUtil.generateRSAKeyPair();
+      KeyPair bobKeyPair = AsymmetricEncryptionUtil.generateRSAKeyPair();
+
+      // Message that Alice wants to send to Bob
+      String originalMessage = "Hello Bob!";
+
+      // Alice encrypts the message using Bob's public key
+      PublicKey bobPublicKey = bobKeyPair.getPublic();
+      String encryptedMessage = AsymmetricEncryptionUtil.encrypt(originalMessage, bobPublicKey);
+      System.out.println("Original Message: " + originalMessage);
+      System.out.println("Encrypted Message: " + encryptedMessage);
+
+      // Bob decrypts the message using his private key
+      PrivateKey bobPrivateKey = bobKeyPair.getPrivate();
+      String decryptedMessage = AsymmetricEncryptionUtil.decrypt(encryptedMessage, bobPrivateKey);
+      System.out.println("Decrypted Message: " + decryptedMessage);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
+```
+In this example:
+
+Alice sends a message to Bob.    
+She encrypts the message using Bob’s public key so that only Bob can decrypt it using his private key.   
+Bob receives the encrypted message and decrypts it using his private key.   
+Ensure you store and transmit key pairs securely and comply with any applicable data protection regulations. Asymmetric encryption can be computationally expensive, especially for large data, so it’s often used to encrypt symmetric keys, which in turn encrypt actual data/messages.
+
+
 ## Exercises
 
 ### Basic Encryption/Decryption
 Create a basic Java application where a user can input a string, which is then encrypted and decrypted using a securely generated key, as demonstrated in the previous examples.
 
+
+### RSA Encryption and Decryption
+Objective: Write a Java program to encrypt and decrypt a text using RSA algorithm.
+
+Description:
+
+- Create two methods: encryptTextUsingRSA and decryptTextUsingRSA.
+- The encryptTextUsingRSA method should take plaintext as input and return the encrypted text.
+- The decryptTextUsingRSA method should take the encrypted text and return the original plaintext.
+- Generate a pair of private and public RSA keys.
+- Use the public key for encryption and the private key for decryption.
+- Handle NoSuchAlgorithmException and InvalidKeyException.
+- You may use the Cipher class from javax.crypto for encryption and decryption.
+
+Sample Code Structure:
+
+```java
+import javax.crypto.Cipher;
+import java.security.*;
+
+public class RSAEncryption {
+
+    public static byte[] encryptTextUsingRSA(String text, PublicKey publicKey) {
+        // Implement encryption logic here
+    }
+
+    public static String decryptTextUsingRSA(byte[] cipherText, PrivateKey privateKey) {
+        // Implement decryption logic here
+    }
+
+    public static void main(String[] args) {
+        // Generate RSA keys
+        // Test encryption and decryption methods
+    }
+}
+```
+
 ### File Encryption/Decryption
 
 - Task A: Implement file encryption by reading the contents of a file, encrypting it, and then writing the encrypted contents back to a file.
 - Task B: Implement file decryption by reading the encrypted contents of a file, decrypting it, and then writing the decrypted contents back to a file.
-
-### Implementing Asymmetric Encryption
-Implement a simple chat program (even just text-based) where messages are encrypted using RSA asymmetric encryption.
-
-- Task A: Generate a pair of RSA keys (public and private).
-- Task B: Implement a function to encrypt messages using the recipient’s public key.
-- Task C: Implement a function to decrypt messages using the recipient’s private key.
-
-
 
 ### Secure Password Storage
 Create an application that securely stores and retrieves user passwords.
@@ -193,8 +327,54 @@ The CryptoUtil class is defined to manage encryption-related operations like key
 The MainApp class demonstrates how to utilize these methods.
 
 
+
+### RSA Encryption and Decryption
+```java
+import javax.crypto.Cipher;
+import java.security.*;
+import java.util.Base64;
+
+public class RSAEncryption {
+
+    public static KeyPair generateKeyPair() throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048);
+        return generator.generateKeyPair();
+    }
+
+    public static String encryptTextUsingRSA(String text, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        byte[] cipherText = cipher.doFinal(text.getBytes());
+        return Base64.getEncoder().encodeToString(cipherText);
+    }
+
+    public static String decryptTextUsingRSA(String cipherText, PrivateKey privateKey) throws Exception {
+        byte[] bytes = Base64.getDecoder().decode(cipherText);
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
+        return new String(cipher.doFinal(bytes));
+    }
+
+    public static void main(String[] args) {
+        try {
+            KeyPair keyPair = generateKeyPair();
+
+            String originalText = "Hello, RSA!";
+            String encryptedText = encryptTextUsingRSA(originalText, keyPair.getPublic());
+            String decryptedText = decryptTextUsingRSA(encryptedText, keyPair.getPrivate());
+
+            System.out.println("Original Text: " + originalText);
+            System.out.println("Encrypted Text: " + encryptedText);
+            System.out.println("Decrypted Text: " + decryptedText);
+        } catch (Exception e) {
+            System.out.println("Error occurred: " + e.getMessage());
+        }
+    }
+}
+```
+
 ### File Encryption/Decryption
-Below are simplified solutions for the tasks in Exercise 2. Note that it is recommended to handle exceptions properly in production code and ensure secure management of keys.
 
 #### File Encryption
 
@@ -281,109 +461,6 @@ This example operates with entire file contents in memory, which might not be su
 
 
 
-### Implementing Asymmetric Encryption
-Here's a simplified example of how you might implement a system with RSA asymmetric encryption in Java.
-
-#### Key Pair Generation
-
-Generate a pair of RSA keys (public and private).
-```java
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-public class AsymmetricEncryptionUtil {
-
-  public static KeyPair generateRSAKeyPair() throws Exception {
-    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-    keyPairGenerator.initialize(2048); // Key size
-    return keyPairGenerator.generateKeyPair();
-  }
-
-  //... Other methods will go here
-}
-```
-#### Encryption
-
-Encrypt a message using the recipient’s public key.
-
-```java
-import javax.crypto.Cipher;
-import java.util.Base64;
-
-public class AsymmetricEncryptionUtil {
-//... Previous methods
-
-  public static String encrypt(String message, PublicKey publicKey) throws Exception {
-    Cipher cipher = Cipher.getInstance("RSA");
-    cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-    byte[] encryptedBytes = cipher.doFinal(message.getBytes());
-    return Base64.getEncoder().encodeToString(encryptedBytes);
-  }
-}
-```
-#### Decryption
-
-Decrypt a message using the recipient’s private key.
-
-```java
-import javax.crypto.Cipher;
-import java.util.Base64;
-
-public class AsymmetricEncryptionUtil {
-//... Previous methods
-
-  public static String decrypt(String encryptedMessage, PrivateKey privateKey) throws Exception {
-    Cipher cipher = Cipher.getInstance("RSA");
-    cipher.init(Cipher.DECRYPT_MODE, privateKey);
-    byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
-    return new String(decryptedBytes);
-  }
-}
-```
-#### Main Application
-
-Let's assume Alice and Bob want to communicate securely. Alice encrypts the message with Bob’s public key, and Bob decrypts it with his private key.
-
-```java
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
-public class MainApp {
-  public static void main(String[] args) {
-    try {
-      // Generate RSA key pairs for Alice and Bob
-      KeyPair aliceKeyPair = AsymmetricEncryptionUtil.generateRSAKeyPair();
-      KeyPair bobKeyPair = AsymmetricEncryptionUtil.generateRSAKeyPair();
-
-      // Message that Alice wants to send to Bob
-      String originalMessage = "Hello Bob!";
-
-      // Alice encrypts the message using Bob's public key
-      PublicKey bobPublicKey = bobKeyPair.getPublic();
-      String encryptedMessage = AsymmetricEncryptionUtil.encrypt(originalMessage, bobPublicKey);
-      System.out.println("Original Message: " + originalMessage);
-      System.out.println("Encrypted Message: " + encryptedMessage);
-
-      // Bob decrypts the message using his private key
-      PrivateKey bobPrivateKey = bobKeyPair.getPrivate();
-      String decryptedMessage = AsymmetricEncryptionUtil.decrypt(encryptedMessage, bobPrivateKey);
-      System.out.println("Decrypted Message: " + decryptedMessage);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-}
-```
-In this example:
-
-Alice sends a message to Bob.    
-She encrypts the message using Bob’s public key so that only Bob can decrypt it using his private key.   
-Bob receives the encrypted message and decrypts it using his private key.   
-Ensure you store and transmit key pairs securely and comply with any applicable data protection regulations. Asymmetric encryption can be computationally expensive, especially for large data, so it’s often used to encrypt symmetric keys, which in turn encrypt actual data/messages.
 
 ### Secure Password Storage Solution
 In this exercise, we aim to create an application that securely stores and retrieves user passwords using hashing and salting techniques.
